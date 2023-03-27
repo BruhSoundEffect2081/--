@@ -2,7 +2,6 @@
 
 Made by SamKogos#1157
 
-dont bully my shit scripting i know i suck RAHHHHHHH
 
 ]]
 
@@ -239,6 +238,23 @@ VisualSec:Toggle("Show Hitboxes", false, "a9", function(t)
     else
         if A then
             A:Disconnect()
+        end
+    end
+end)
+
+VisualSec:Button("Instakill Meister (WEAPON)", function()
+    for i = 1, 50 do
+        game:GetService("ReplicatedStorage").remotes.remoteEvent:FireServer("resonate",{false})
+    end
+end)
+
+local ARES = false
+VisualSec:Toggle("Auto Resonane (WEAPON)", false, "a9", function(t) 
+    ARES = t 
+    while ARES do 
+        if ARES then
+            game:GetService("ReplicatedStorage").remotes.remoteEvent:FireServer("resonate",{true})
+            wait()
         end
     end
 end)
