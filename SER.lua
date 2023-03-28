@@ -2,6 +2,8 @@
 
 Made by SamKogos#1157
 
+insta eat nearby souls
+tp to witch souls and eat
 
 ]]
 
@@ -39,12 +41,14 @@ local AFTab = Window:Tab("AutoFarm")
 local NotifTab = Window:Tab("Notifications")
 local ESPTab = Window:Tab("ESP")
 local TPTab = Window:Tab("Teleports")
+local SoulsTab = Window:Tab("Souls")
 local VisualTab = Window:Tab("Visuals/Other")
 
 local AFSec = AFTab:Section("-")
 local NotifSec = NotifTab:Section("-")
 local ESPSec = ESPTab:Section("-")
 local TPSec = TPTab:Section("-")
+local SoulsSec = SoulsTab:Section("-")
 local VisualSec = VisualTab:Section("-")
 
 -- AFSec:Label("Only use 1")
@@ -227,6 +231,54 @@ for _,v in pairs(TeleportCFrames) do
         LocalPlayer.Character.HumanoidRootPart.CFrame = TeleportCFrames[_]
     end)
 end
+
+local ENST = false
+SoulsSec:Toggle("Eat Nearby Souls", false, "a9", function(t) 
+    ENST = t 
+    while ENST do 
+        if ENST then
+            for _,v in pairs(Workspace.special:GetChildren()) do
+                if LocalPlayer.Character and v:FindFirstChild("Soul") and v:FindFirstChild("ProximityPrompt") then
+                    if LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                        local Dist = (v.Soul.Position - LocalPlayer.Character.HumanoidRootPart.Position).magnitude
+                        if Dist < 8 then
+                            fireproximityprompt(v.ProximityPrompt)
+                        end
+                    end
+                end
+            end
+            wait()
+        end
+    end
+end)
+
+local KYSNOW = false
+SoulsSec:Toggle("TP to Witch Souls", false, "a9", function(t) 
+    KYSNOW = t 
+end)
+
+local SoulsList = {"white","red","purple"}
+local TPSoulList = {"purple"}
+Workspace.special.ChildAdded:Connect(function(Child)
+    if table.find(SoulsList,Child.Name) then
+        local Prox = Child:WaitForChild("ProximityPrompt")
+        local Soul = Child:WaitForChild("Soul")
+        repeat
+            wait()
+        until LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        local OldPos = LocalPlayer.Character.HumanoidRootPart.Position
+        if table.find(TPSoulList,Child.Name) and KYSNOW then
+            LocalPlayer.Character.HumanoidRootPart.Position = Soul.Position
+            wait(.1)
+        end
+        local Dist = (Soul.Position - LocalPlayer.Character.HumanoidRootPart.Position).magnitude
+        if Dist < 8 and ENST then
+            fireproximityprompt(Prox)
+            wait()
+            LocalPlayer.Character.HumanoidRootPart.Position = OldPos
+        end
+    end
+end)
 
 --VisualTab
 
