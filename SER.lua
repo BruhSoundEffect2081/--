@@ -2,9 +2,6 @@
 
 Made by SamKogos#1157
 
-insta eat nearby souls
-tp to witch souls and eat
-
 ]]
 
 if not game:IsLoaded() then repeat task.wait() until game:IsLoaded() end
@@ -232,6 +229,9 @@ for _,v in pairs(TeleportCFrames) do
     end)
 end
 
+local SoulsList = {"white","red","purple"}
+local TPSoulList = {"purple"}
+
 local ENST = false
 SoulsSec:Toggle("Eat Nearby Souls", false, "a9", function(t) 
     ENST = t 
@@ -252,13 +252,19 @@ SoulsSec:Toggle("Eat Nearby Souls", false, "a9", function(t)
     end
 end)
 
+SoulsSec:MultiDropdown("Nearby Dropdown", SoulsList, {"white","red","purple"},"Dropdown", function(t)
+    SoulsList = t
+end)
+
 local KYSNOW = false
-SoulsSec:Toggle("TP to Witch Souls", false, "a9", function(t) 
+SoulsSec:Toggle("TP to Selected Souls", false, "a9", function(t) 
     KYSNOW = t 
 end)
 
-local SoulsList = {"white","red","purple"}
-local TPSoulList = {"purple"}
+SoulsSec:MultiDropdown("TP Dropdown", SoulsList, {"purple"}, "Dropdown", function(t)
+    TPSoulList = t
+end)
+
 Workspace.special.ChildAdded:Connect(function(Child)
     if table.find(SoulsList,Child.Name) then
         local Prox = Child:WaitForChild("ProximityPrompt")
