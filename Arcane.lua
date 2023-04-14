@@ -21,7 +21,6 @@ local Window = SolarisLib:New({Name = "Arcane Odyssey Chest ESP - SamKogos#1157"
 local SetTab = Window:Tab("-") 
 local MainSec = SetTab:Section("-") 
 local Map = game:GetService("Workspace").Map
-rconsoleclear()
 local function AddAllChests()
     for chesttype,enabled in pairs(ChestTypes) do
         ESP[chesttype] = enabled
@@ -49,8 +48,11 @@ local function AddSpecificChest(chest)
 end
 
 Map.DescendantAdded:Connect(function(chest)
-    if string.find(chest.Name,"Chest") and string.find(v.Parent,Name,"Chest") then
-        AddSpecificChest(chest)
+    wait()
+    if string.find(chest.Name,"Chest") and chest.Parent then
+        if string.find(v.Parent,Name,"Chest") then
+            AddSpecificChest(chest)
+        end
     end
 end)
 
@@ -70,7 +72,7 @@ end)
     
 MainSec:Label("Chests/Bags/Crates")
 
-for _,v in pairs(getgenv().ChestTypesNames) do
+for _,v in pairs(ChestTypesNames) do
     MainSec:Toggle(v, false, "a1", function(newval)
         ChestTypes[v] = newval
         AddAllChests()
