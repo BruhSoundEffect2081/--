@@ -3,7 +3,7 @@ local ChestTypesNames = {
     "Silver Chest";"Golden Chest";
     "Weapon Chest";"Great Weapon Chest";"Elite Weapon Chest";
     "Armor Chest";"Great Armor Chest";"Elite Armor Chest";
-    "Scroll Chest";"Great Scroll Chest";"Elite Scroll Chest";
+    "Scroll Chest";"Uncommon Scroll Chest";"Great Scroll Chest";"Elite Scroll Chest";
     "Food Crate";"Uncommon Food Crate";
     "Ingredient Bag";"Uncommon Ingredient Bag";"Rare Ingredient Bag";
 }
