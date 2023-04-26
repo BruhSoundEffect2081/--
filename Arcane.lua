@@ -1,11 +1,12 @@
 local ChestTypesNames = {
     "Sailor Chest";"Great Sailor Chest";"Elite Sailor Chest";
-    "Silver Chest";"Golden Chest";
+    "Treasure Chest";"Silver Chest";"Golden Chest";
     "Weapon Chest";"Great Weapon Chest";"Elite Weapon Chest";
     "Armor Chest";"Great Armor Chest";"Elite Armor Chest";
-    "Scroll Chest";"Uncommon Scroll Chest";"Great Scroll Chest";"Elite Scroll Chest";
+    "Scroll Chest";"Uncommon Scroll Chest";"Rare Scroll Chest";"Elite Scroll Chest";
     "Food Crate";"Uncommon Food Crate";
     "Ingredient Bag";"Uncommon Ingredient Bag";"Rare Ingredient Bag";
+    "Private Storage";
 }
 
 local Chests = {}
@@ -50,7 +51,7 @@ end
 Map.DescendantAdded:Connect(function(chest)
     wait()
     if string.find(chest.Name,"Chest") and chest.Parent then
-        if string.find(v.Parent,Name,"Chest") then
+        if string.find(v.Parent.Name,"Chest") then
             AddSpecificChest(chest)
         end
     end
