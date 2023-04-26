@@ -39,21 +39,18 @@ local function AddAllChests()
 end
 
 local function AddSpecificChest(chest)
-    if chest:IsA("Model") and getgenv().ChestTypes[chest.Name] then
-        ESP:Add(chest:FindFirstChildWhichIsA("MeshPart"), {
-            Name = chest.Name,
-            IsEnabled = chest.Name,
-            Color = getgenv().ChestESPColor
-        })
-    end
+    ESP:Add(chest:FindFirstChildWhichIsA("MeshPart"), {
+        Name = chest.Name,
+        IsEnabled = chest.Name,
+        Color = getgenv().ChestESPColor
+    })
 end
 
 Map.DescendantAdded:Connect(function(chest)
-    wait()
-    if string.find(chest.Name,"Chest") and chest.Parent then
-        if string.find(v.Parent.Name,"Chest") then
-            AddSpecificChest(chest)
-        end
+    wait(1)
+    if not chest and chest.Parent then return end
+    if chest:IsA("Model") and getgenv().ChestTypes[chest.Name] and chest.Parent then
+        AddSpecificChest(chest)
     end
 end)
 
