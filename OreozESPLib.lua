@@ -9,15 +9,44 @@ if ESPStorage then
     end
 end
 
+getgenv().ESPGroups = {}
 getgenv().ESPStorage = {}
 getgenv().ESP = {
+    
+    ToggleGroup = function(Group)
+        if ESP.CheckGroup(Group) or not ESP.CheckGroup(Group) then
+            ESPGroups[Group] = not ESPGroups[Group]
+            ESP.Update()
+        end
+        return
+    end;
+    
+    CheckGroup = function(Check)
+        if ESPGroups[Check] == true or ESPGroups[Check] == false then
+            return ESPGroups[Check]
+        end
+        return "not a thing bucko."
+    end;
+    
+    CreateGroup = function(New,Default)
+        if not New or Default == nil then return end
+        ESPGroups[New] = Default
+    end;
     
     Update = function()
         for id,table in pairs(ESPStorage) do
             local TempSettings = table["Settings"]
             local Parts = table["Parts"]
             local Enabled = table["Enabled"]
+            local TempEnabled = true
             local Instance = table["Instance"]
+            if TempSettings["Group"] then
+                if not ESP.CheckGroup(TempSettings["Group"]) then
+                    TempEnabled = false
+                else
+                    TempEnabled = Enabled
+                end
+            end
             if not Instance then
                 ESP.Remove(Instance)
                 return
@@ -102,7 +131,7 @@ getgenv().ESP = {
                     v[2].Color = Color3.fromRGB(255,255,255);
                 end
                 if OnScreen then
-                    v[2].Visible = Enabled
+                    v[2].Visible = TempEnabled
                 else
                     v[2].Visible = false
                 end
@@ -194,6 +223,11 @@ getgenv().ESP = {
         if Options["CheckForESPOnInstance"] and ESP.Check(Instance) then 
             return
         end
+        if Options["Group"] then
+            if ESP.CheckGroup(Options["Group"]) == "not a thing bucko." then
+                ESP.CreateGroup(Options["Group"],true)
+            end
+        end
         
         local GUID = game:GetService("HttpService"):GenerateGUID(false)
         
@@ -268,6 +302,7 @@ getgenv().ESP = {
 
 --     MaxDistance = 999999;
 --     CustomColor = Color3.fromRGB(255,0,0);
+--     Group = "Group 1";
 
 --     ParentCheck = Wall.Parent;
 --     FindFirstChildCheck = Wall.Child;
