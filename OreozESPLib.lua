@@ -97,6 +97,9 @@ getgenv().ESP = {
             local Vector, OnScreen = Camera:WorldToViewportPoint(Instance.Position)
             for _,v in pairs(Parts) do
                 if v[1][1] == "Line" then
+                    if not ESPSettings["Tracers"] then 
+                        TempEnabled = false
+                    end
                     v[2].From = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 1.3)
                     v[2].To = Vector2.new(Vector.X, Vector.Y)
                 elseif v[1][1] == "Circle" then
@@ -104,6 +107,9 @@ getgenv().ESP = {
                 elseif v[1][1] == "Text" then
                     local AddOffset = false
                     if v[1][2] == "DistanceTag" then
+                        if not ESPSettings["Distance"] then 
+                            TempEnabled = false
+                        end
                         if Players.LocalPlayer.Character then
                             if Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
                                 local Dist = (Players.LocalPlayer.Character.HumanoidRootPart.Position - Instance.Position).magnitude
