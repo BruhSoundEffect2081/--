@@ -9,9 +9,19 @@ if ESPStorage then
     end
 end
 
+getgenv().ESPSettings = {
+    ["Tracers"] = true;
+    ["Distance"] = true;
+}
+
 getgenv().ESPGroups = {}
 getgenv().ESPStorage = {}
 getgenv().ESP = {
+    
+    Setting = function(Name,Val)
+        if not Name and not Val then return end
+        getgenv().ESPSettings[Name] = val
+    end;
     
     ToggleGroup = function(Group)
         if ESP.CheckGroup(Group) or not ESP.CheckGroup(Group) then
