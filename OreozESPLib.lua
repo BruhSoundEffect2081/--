@@ -1,11 +1,9 @@
-getgenv().AutoUpdate_OESP = false
 repeat game:GetService("RunService").Heartbeat:Wait() until game:IsLoaded()
 local StartTick = tick()
 local Players = game.Players or game:GetService("Players")
 local Workspace = game.Workspace or game:GetService("Workspace")
 local RunService = game.RunService or game:GetService("RunService")
 
-getgenv().RCONSOLEMODE = true
 getgenv().RCP = function(Message,Color,Clear)
     coroutine.wrap(function()
         if not RCONSOLEMODE then return end
