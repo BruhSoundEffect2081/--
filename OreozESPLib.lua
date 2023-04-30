@@ -1,19 +1,45 @@
+getgenv().AutoUpdate_OESP = false
 repeat game:GetService("RunService").Heartbeat:Wait() until game:IsLoaded()
-local Players = game:GetService("Players")
-local Workspace = game:GetService("Workspace")
-local RunService = game:GetService("RunService")
+local StartTick = tick()
+local Players = game.Players or game:GetService("Players")
+local Workspace = game.Workspace or game:GetService("Workspace")
+local RunService = game.RunService or game:GetService("RunService")
+
+getgenv().RCONSOLEMODE = true
+getgenv().RCP = function(Message,Color,Clear)
+    coroutine.wrap(function()
+        if not RCONSOLEMODE then return end
+        if Clear then rconsoleclear() return end
+        local Send = ""
+        local Colors = {
+            ["message"] = "LIGHT_BLUE";
+            ["error"] = "RED";
+            ["nicemessage"] = "LIGHT_GREEN";
+            ["dark"] = "DARK_GRAY";
+        }
+        if typeof(Message) == "table" then
+            Send = table.concat(Message," ")
+        else
+            Send = tostring(Message)
+        end
+        if Color then if Colors[Color] then rconsoleprint("@@"..Colors[Color].."@@") end end
+        rconsoleprint(Send.."\n")
+    end)()
+end
+RCP("","",true)
+RCP({"O-ESP Lib Loading","Tick",tick()-StartTick},"message")
+
+local ErrorStatus,ErrorMessage = pcall(function()
+-- PCALL START
 
 if ESPStorage then
     for id,table in pairs(ESPStorage) do
+        RCP({"Removed",id},"dark")
         table["Delete"]()
     end
 end
 
-getgenv().ESPSettings = {
-    ["Tracers"] = true;
-    ["Distance"] = true;
-}
-
+RCP({"O-ESP Creating ESP Functions",},"message")
 getgenv().ESPGroups = {}
 getgenv().ESPStorage = {}
 getgenv().ESP = {
@@ -21,12 +47,16 @@ getgenv().ESP = {
     Setting = function(Name,Val)
         if not Name and not Val then return end
         getgenv().ESPSettings[Name] = val
+        return
     end;
     
-    ToggleGroup = function(Group)
+    ToggleGroup = function(Group,Forced)
         if ESP.CheckGroup(Group) or not ESP.CheckGroup(Group) then
-            ESPGroups[Group] = not ESPGroups[Group]
-            ESP.Update()
+            if not Forced then
+                ESPGroups[Group] = not ESPGroups[Group]
+            else
+                ESPGroups[Group] = Forced
+            end
         end
         return
     end;
@@ -41,15 +71,36 @@ getgenv().ESP = {
     CreateGroup = function(New,Default)
         if not New or Default == nil then return end
         ESPGroups[New] = Default
+        return
     end;
     
     Update = function()
+        local ErrorStatus2, ErrorMessage2 = pcall(function()
         for id,table in pairs(ESPStorage) do
             local TempSettings = table["Settings"]
             local Parts = table["Parts"]
             local Enabled = table["Enabled"]
             local TempEnabled = true
             local Instance = table["Instance"]
+            if Players.LocalPlayer.Character then
+                if Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                    local Dist = (Players.LocalPlayer.Character.HumanoidRootPart.Position - Instance.Position).magnitude
+                    Dist = string.split(tostring(Dist),".")[1]
+                    if TempSettings["MaxDistance"] then
+                        if tonumber(Dist) > TempSettings["MaxDistance"] then
+                            ESP.Hide(Instance)
+                            return
+                        end
+                    end
+                else
+                    ESP.Hide(Instance)
+                    return
+                end
+            else
+                ESP.Hide(Instance)
+                return
+            end
+            
             if TempSettings["Group"] then
                 if not ESP.CheckGroup(TempSettings["Group"]) then
                     TempEnabled = false
@@ -95,63 +146,67 @@ getgenv().ESP = {
             if not Continue then ESP.Remove(Instance) return end
             local Camera = Workspace.CurrentCamera or Workspace:WaitForChild("Camera")
             local Vector, OnScreen = Camera:WorldToViewportPoint(Instance.Position)
-            for _,v in pairs(Parts) do
-                if v[1][1] == "Line" then
-                    if not ESPSettings["Tracers"] then 
-                        TempEnabled = false
-                    end
-                    v[2].From = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 1.3)
-                    v[2].To = Vector2.new(Vector.X, Vector.Y)
-                elseif v[1][1] == "Circle" then
-                    v[2].Position = Vector2.new(Vector.X, Vector.Y)
-                elseif v[1][1] == "Text" then
-                    local AddOffset = false
-                    if v[1][2] == "DistanceTag" then
-                        if not ESPSettings["Distance"] then 
-                            TempEnabled = false
-                        end
-                        if Players.LocalPlayer.Character then
-                            if Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                                local Dist = (Players.LocalPlayer.Character.HumanoidRootPart.Position - Instance.Position).magnitude
-                                Dist = string.split(tostring(Dist),".")[1]
-                                if TempSettings["MaxDistance"] then
-                                    if tonumber(Dist) > TempSettings["MaxDistance"] then
-                                        table["Enabled"] = false
-                                    elseif OnScreen then
-                                        table["Enabled"] = true
+            local A,B = pcall(function()
+                for _,v in pairs(Parts) do
+                    if not Vector or not v then return end
+                    if v[1][1] == "Line" then
+                        v[2].From = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 1.3)
+                        v[2].To = Vector2.new(Vector.X, Vector.Y)
+                    elseif v[1][1] == "Circle" then
+                        v[2].Position = Vector2.new(Vector.X, Vector.Y)
+                    elseif v[1][1] == "Text" then
+                        local AddOffset = false
+                        if v[1][2] == "DistanceTag" then
+                            if Players.LocalPlayer.Character then
+                                if Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                                    local Dist = (Players.LocalPlayer.Character.HumanoidRootPart.Position - Instance.Position).magnitude
+                                    Dist = string.split(tostring(Dist),".")[1]
+                                    if TempSettings["MaxDistance"] then
+                                        if tonumber(Dist) > TempSettings["MaxDistance"] then
+                                            table["Enabled"] = false
+                                        elseif OnScreen then
+                                            table["Enabled"] = true
+                                        end
                                     end
+                                    v[2].Position = Vector2.new(Vector.X, Vector.Y + 20)
+                                    v[2].Text = Dist.."m"
+                                else
+                                    table["Enabled"] = false
                                 end
-                                v[2].Position = Vector2.new(Vector.X, Vector.Y + 20)
-                                v[2].Text = Dist.."m"
+                            else
+                                table["Enabled"] = false
+                            end
+                        elseif v[1][2] == "HealthTag" then
+                            local Humanoid = Instance.Parent:FindFirstChildWhichIsA("Humanoid")
+                            if Humanoid then
+                                v[2].Position = Vector2.new(Vector.X, Vector.Y + 35)
+                                v[2].Text = Humanoid.Health.."/"..Humanoid.MaxHealth
                             else
                                 v[2].Visible = false
                             end
                         else
-                            v[2].Visible = false
+                            v[2].Position = Vector2.new(Vector.X, Vector.Y + 5)
                         end
-                    elseif v[1][2] == "HealthTag" then
-                        local Humanoid = Instance:FindFirstChildWhichIsA("Humanoid")
-                        if Humanoid then
-                            v[2].Position = Vector2.new(Vector.X, Vector.Y + 35)
-                            v[2].Text = Humanoid.Health.."/"..Humanoid.MaxHealth
-                        else
-                            v[2].Visible = false
-                        end
+                    end
+                    if TempSettings["CustomColor"] then
+                        v[2].Color = TempSettings["CustomColor"];
                     else
-                        v[2].Position = Vector2.new(Vector.X, Vector.Y + 5)
+                        v[2].Color = Color3.fromRGB(255,255,255);
+                    end
+                    if OnScreen then
+                        v[2].Visible = TempEnabled
+                    else
+                        v[2].Visible = false
                     end
                 end
-                if TempSettings["CustomColor"] then
-                    v[2].Color = TempSettings["CustomColor"];
-                else
-                    v[2].Color = Color3.fromRGB(255,255,255);
-                end
-                if OnScreen then
-                    v[2].Visible = TempEnabled
-                else
-                    v[2].Visible = false
-                end
+            end)
+            if not A then
+                ESP.Remove(Instance)
             end
+        end
+        end)
+        if not ErrorStatus2 then
+            RCP({"O-ESP Update Error [",ErrorMessage2,"]"},"error")
         end
     end;
     
@@ -175,6 +230,7 @@ getgenv().ESP = {
                 break
             end
         end
+        return
     end;
     
     ModifyAll = function(Modifying)
@@ -233,6 +289,8 @@ getgenv().ESP = {
     end;
     
     Create = function(Instance,Options)
+        local CreateGUIDTemp = ""
+        local ErrorStatus3, ErrorMessage3 = pcall(function()
         if not Options or not Instance then return end
         if not Options["Dot"] and not Options["Tracers"] then return end
         if not Options["Nametag"] then return end
@@ -241,12 +299,12 @@ getgenv().ESP = {
         end
         if Options["Group"] then
             if ESP.CheckGroup(Options["Group"]) == "not a thing bucko." then
-                ESP.CreateGroup(Options["Group"],true)
+                ESP.CreateGroup(Options["Group"],false)
             end
         end
         
         local GUID = game:GetService("HttpService"):GenerateGUID(false)
-        
+        CreateGUIDTemp = GUID
         ESPStorage[GUID] = {
             ["Instance"] = Instance;
             ["Settings"] = Options;
@@ -254,6 +312,8 @@ getgenv().ESP = {
             ["Enabled"] = false;
             ["Delete"] = function() 
                 for _,v in pairs(ESPStorage[GUID]["Parts"]) do
+                    if not v then return end
+                    if not v[2] then return end
                     v[2]:Remove()
                 end
             end;
@@ -269,6 +329,7 @@ getgenv().ESP = {
         
         for _,v in pairs(Options) do 
             if Create[_] then
+                if not ESPStorage[GUID] then ESP.Remove(Instance) return end
                 local ObjectGUID = game:GetService("HttpService"):GenerateGUID(false)
                 local Object = Create[_]
                 local Parts = ESPStorage[GUID]["Parts"]
@@ -303,13 +364,44 @@ getgenv().ESP = {
                     Parts[ObjectGUID][2].OutlineColor = Color3.fromRGB(0,0,0)
                     Parts[ObjectGUID][2].Position = Vector2.new(0,0);
                 end
+                wait()
             end
         end
         ESPStorage[GUID]["Enabled"] = true
         ESP.Update(Instance)
+        end)
+        if not ErrorStatus3 then
+            RCP({"O-ESP Create Error [",ErrorMessage3,"]"},"error")
+        else
+            --RCP({"O-ESP Created Successfully",tostring(CreateGUIDTemp)},"nicemessage")
+        end
+        return
     end
 }
 
+RCP({"O-ESP Checking Auto Update",},"message")
+if CONN_OESP_RENDERSTEP then
+    CONN_OESP_RENDERSTEP:Disconnect()
+end
+
+if AutoUpdate_OESP then
+    getgenv().CONN_OESP_RENDERSTEP = RunService.RenderStepped:Connect(function()
+        ESP.Update()
+    end)
+    RCP("Auto Update Is Enabled.","nicemessage")
+else
+    RCP("Auto Update Isn't Enabled.","error")
+end
+
+-- PCALL END
+end)
+
+if not ErrorStatus then
+    RCP({"O-ESP Lib Startup Error [",tostring(ErrorMessage),"]"},"error")
+else
+    RCP({"O-ESP Lib Loaded In",tick()-StartTick},"message")
+end
+return
 -- ESP.Create(Wall,{
 --     Nametag = {
 --         Enabled = true;
